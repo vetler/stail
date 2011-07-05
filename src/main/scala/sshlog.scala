@@ -3,7 +3,8 @@ import scala.io.Source
 import com.jcraft.jsch._
 
 object SSHLog {
-  var forwardingPort = 10000 // Next available port for port forwarding
+  val defaultForwardingPort = 10000
+  val defaultTimeout = 10000
 
   def usage() {
     println("""
@@ -16,6 +17,8 @@ Usage: sshlog <FILE>
   def main(args: Array[String]) {
     if (args.length == 0) usage
 
+    val forwardingPort = if (args.length == 3) args(2).toInt else defaultForwardingPort
+    
     var configurations = List[Configuration]()
     val configurationFile = new File(args(0))
     Source.fromFile(configurationFile)("UTF-8").getLines() foreach { untrimmedLine =>
@@ -62,31 +65,31 @@ Usage: sshlog <FILE>
             println("Tailing log files on " + config.server + ", forwarded through " + forwardedThroughServer)
             val jsch = new JSch()
             val forwardingSession = createSession(jsch, forwardedThroughServer, config.user, config.password, 22)
-            forwardingSession.connect()
+            forwardingSession.connect(defaultTimeout)
             forwardingSession.setPortForwardingL(forwardingPort, config.server, 22)
 
             val session = createSession(jsch, "localhost", config.user, config.password, forwardingPort)
-            session.connect()
+            session.connect(defaultTimeout)
 
             val channel = session.openChannel("exec").asInstanceOf[ChannelExec]
             channel.setCommand("tail -f " + config.files.mkString("", " ", ""))
             channel.setInputStream(null)
             channel.setErrStream(System.err)
             channel.setOutputStream(System.out)
-            channel.connect()
+            channel.connect(defaultTimeout)
           }
           case None => {
             println("Tailing log files on " + config.server)
             val jsch = new JSch()
             val session = createSession(jsch, config.server, config.user, config.password, 22)
-            session.connect
+            session.connect(defaultTimeout)
 
             val channel = session.openChannel("exec").asInstanceOf[ChannelExec]
             channel.setCommand("tail -f " + config.files.mkString("", " ", ""))
             channel.setInputStream(null)
             channel.setErrStream(System.err)
             channel.setOutputStream(System.out)
-            channel.connect()
+            channel.connect(defaultTimeout)
           }
         }
       }
