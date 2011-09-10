@@ -3,3 +3,10 @@ syntax: glob
 target
 project/boot
 .idea*
+.ensime
+
+syntax: regex
+*~
+*.swp
+
+
