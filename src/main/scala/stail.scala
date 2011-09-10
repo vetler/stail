@@ -23,6 +23,7 @@ object STail {
     }
 
     var hostSpec = args.length match {
+      case 0 => usage()
       case 1 => args(0)
       case 3 => args(2)
       case _ => dieWithError("Unrecognized number of arguments: "+ args.length)
@@ -65,7 +66,7 @@ object STail {
     println("Connected to "+ host)
   }
 
-  def usage() {
+  def usage(): String = {
     println("""
 Usage: stail <OPTIONS> username@host:/path/to/file
 
