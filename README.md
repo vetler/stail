@@ -37,3 +37,14 @@ environment variable `$STAIL_JAR` to point to it.
 
 If you are building **stail** yourself, you can use `sbt assembly` to
 build a self-contained jar file.
+
+### Examples
+
+#### Connecting directly to a server
+
+    stail user@example.com:/var/log/apache2/access.log
+
+#### Connecting via another server
+
+    stail -via anotheruser@external.example.com:9999 user@internal.example.com:/var/log/apache2/access.log
+
