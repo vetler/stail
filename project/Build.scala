@@ -9,7 +9,8 @@ object Build extends Build
     name := "stail",
     libraryDependencies ++= Seq("org.scala-lang" % "scala-compiler" % "2.9.1",
 				"jline" % "jline" % "0.9.9"),
-    scalaVersion := "2.9.1"
+    scalaVersion := "2.9.1",
+    scalacOptions += "-deprecation"
   )
 
 }
