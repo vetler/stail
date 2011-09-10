@@ -5,8 +5,8 @@ project/boot
 .idea*
 .ensime
 
-syntax: regex
-*~
-*.swp
+syntax: regexp
+.*~
+.*\.swp
 
 
