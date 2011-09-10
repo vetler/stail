@@ -12,8 +12,8 @@ forwarding.
 At the moment, it's not such a big improvement over just doing it
 yourself, but the idea is that it will be expanded in the future with
 pattern matching and filtering. Other suggestions are welcome, please
-file <a href="https://bitbucket.org/vetler/stail/issues/new">an
-issue</a>.
+file [an
+issue](https://bitbucket.org/vetler/stail/issues/new).
 
 
 Usage
@@ -25,5 +25,15 @@ Usage
         -via HOSTSPEC     Tail file on remote host by using SSH forwarding through the specified host.
                           Local port to be used for port forwarding can also be specified.
 
-                          Example: user@example.com:1001:/path/to/file
+                          Example: user@example.com:1001
 
+To use *stail* like this, you first have to build it and set up a
+wrapper script. A sample wrapper script can be found [in the
+source](https://bitbucket.org/vetler/stail/src/c77f3a5b7cec/src/main/shell/stail). To
+use this script, first [download
+it](https://bitbucket.org/vetler/stail/raw/c77f3a5b7cec/src/main/shell/stail),
+download the [pre-built jar file]() (or build it yourself) and set the
+environment variable <STAIL_JAR> to point to it.
+
+If you are building *stail* yourself, you can use <sbt assembly> to
+build a self-contained jar file.
