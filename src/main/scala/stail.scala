@@ -29,26 +29,25 @@ object STail {
       case _ => dieWithError("Unrecognized number of arguments: "+ args.length)
     }
 
-    var (username, host, port, path) = readHostSpec(hostSpec)
+    val (username, origHost, origPort, path) = readHostSpec(hostSpec)
 
     val jsch = new JSch()
 
     // Set up forwarding
-    val (newHost, newPort) = fwHostSpec match {
+    val (host, port) = fwHostSpec match {
       case Some(x) =>
-	forwardingSetup(jsch, x)
-	("localhost", 22)
+	forwardingSetup(jsch, origHost, x)
       case None =>
-	(host, port)
+	(origHost, origPort)
     }
 
     // Create the session for tailing, connecting either directly to
     // the server, or to localhost if we're using forwarding
     val password = readPassword(username, host).toString
-    val session = createSession(jsch, host, username, password, 22)
+    val session = createSession(jsch, host, username, password, port.get.toInt)
     session.connect(defaultTimeout)
 
-    println("Connected to "+ host)
+    println("Connected to "+ origHost + (if (origHost == host) "" else " (via local port "+ port.get))
 
     val channel = session.openChannel("exec").asInstanceOf[ChannelExec]
     channel.setCommand("tail -f "+ path.get)
@@ -58,12 +57,17 @@ object STail {
     channel.connect(defaultTimeout)
   }
 
-  def forwardingSetup(jsch: JSch, hostSpec: String) = {
+  def forwardingSetup(jsch: JSch, remoteHost: String, hostSpec: String) = {
     val (username, host, port, path) = readHostSpec(hostSpec)
+    val forwardingPort = port match {
+      case Some(x) => x
+      case None => defaultForwardingPort
+    }
     val forwardingSession = createSession(jsch, host, username, readPassword(username, host).toString, 22)
     forwardingSession.connect(defaultTimeout)
-    forwardingSession.setPortForwardingL(port.getOrElse(defaultForwardingPort).toInt, host, 22)
-    println("Connected to "+ host)
+    forwardingSession.setPortForwardingL(forwardingPort.toInt, remoteHost, 22)
+    println("Forwarding through "+ host + " on local port "+ forwardingPort)
+    ("localhost", Some(forwardingPort))
   }
 
   def usage(): String = {
