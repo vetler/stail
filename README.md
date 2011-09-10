@@ -7,7 +7,8 @@ Overiew
 
 Stail is a tool for tailing files over SSH. It can connect to a server
 directly, or by first going through another server using SSH port
-forwarding.
+forwarding, and it will then call the `tail` command and echo the
+output.
 
 At the moment, it's not such a big improvement over just doing it
 yourself if you have SSH installed, but the idea is that it will be

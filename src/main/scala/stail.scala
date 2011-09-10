@@ -1,3 +1,5 @@
+package stail
+
 // Good, old java imports
 import java.io.File
 import java.io.Console
@@ -10,7 +12,7 @@ import scala.tools.nsc.interpreter.NamedParam
 // Java library for SSH
 import com.jcraft.jsch._
 
-object STail {
+object App {
   def usage(): String = {
     println("""
 Usage: stail <OPTIONS> username@host:/path/to/file
@@ -60,7 +62,31 @@ Options:
     channel.setCommand("tail -f "+ path.get)
     channel.setInputStream(null)
     channel.setErrStream(System.err)
-    channel.setOutputStream(System.out)
+
+    val outputStream = new stail.OutputStream()
+    channel.setOutputStream(outputStream)
+
+    val manager = scala.tools.util.SignalManager
+    manager("INT") = {
+      println("")
+      outputStream.disable
+      
+      while (outputStream.disabled) {
+	print("> ")
+	val line = new jline.ConsoleReader().readLine()
+	
+	line.trim match {
+	  case "cont" | "c" | "continue" => outputStream.enable
+	  case "q" | "quit" => {
+	    session.disconnect
+	    channel.disconnect
+	    sys.exit(0)
+	  }
+	  case _ => Nil
+	}
+      }
+    }
+
     channel.connect(defaultTimeout)
   }
 
