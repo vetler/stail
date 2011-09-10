@@ -32,7 +32,7 @@ wrapper script. A sample wrapper script can be found [in the
 source](https://bitbucket.org/vetler/stail/src/c77f3a5b7cec/src/main/shell/stail). To
 use this script, first [download
 it](https://bitbucket.org/vetler/stail/raw/c77f3a5b7cec/src/main/shell/stail),
-download the [pre-built jar file]() (or build it yourself) and set the
+download the [pre-built jar file](https://bitbucket.org/vetler/stail/downloads/stail-assembly-0.1.jar) (or build it yourself) and set the
 environment variable <STAIL_JAR> to point to it.
 
 If you are building *stail* yourself, you can use <sbt assembly> to
