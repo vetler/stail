@@ -10,11 +10,10 @@ directly, or by first going through another server using SSH port
 forwarding.
 
 At the moment, it's not such a big improvement over just doing it
-yourself, but the idea is that it will be expanded in the future with
-pattern matching and filtering. Other suggestions are welcome, please
-file [an
+yourself if you have SSH installed, but the idea is that it will be
+expanded in the future with pattern matching and filtering. Other
+suggestions are welcome, please file [an
 issue](https://bitbucket.org/vetler/stail/issues/new).
-
 
 Usage
 -----
