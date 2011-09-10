@@ -11,7 +11,59 @@ import scala.tools.nsc.interpreter.NamedParam
 import com.jcraft.jsch._
 
 object STail {
+  val defaultForwardingPort = "10001"
   val defaultTimeout = 10000
+
+  def main(args: Array[String]) {
+    // 3 arguments means the user wrote "-via HOSTSPEC", unless he's
+    // done something wrong
+    var fwHostSpec = args.length match {
+      case 3 => Some(args(1))
+      case _ => None
+    }
+
+    var hostSpec = args.length match {
+      case 1 => args(0)
+      case 3 => args(2)
+      case _ => dieWithError("Unrecognized number of arguments: "+ args.length)
+    }
+
+    var (username, host, port, path) = readHostSpec(hostSpec)
+
+    val jsch = new JSch()
+
+    // Set up forwarding
+    val (newHost, newPort) = fwHostSpec match {
+      case Some(x) =>
+	forwardingSetup(jsch, x)
+	("localhost", 22)
+      case None =>
+	(host, port)
+    }
+
+    // Create the session for tailing, connecting either directly to
+    // the server, or to localhost if we're using forwarding
+    val password = readPassword(username, host).toString
+    val session = createSession(jsch, host, username, password, 22)
+    session.connect(defaultTimeout)
+
+    println("Connected to "+ host)
+
+    val channel = session.openChannel("exec").asInstanceOf[ChannelExec]
+    channel.setCommand("tail -f "+ path.get)
+    channel.setInputStream(null)
+    channel.setErrStream(System.err)
+    channel.setOutputStream(System.out)
+    channel.connect(defaultTimeout)
+  }
+
+  def forwardingSetup(jsch: JSch, hostSpec: String) = {
+    val (username, host, port, path) = readHostSpec(hostSpec)
+    val forwardingSession = createSession(jsch, host, username, readPassword(username, host).toString, 22)
+    forwardingSession.connect(defaultTimeout)
+    forwardingSession.setPortForwardingL(port.getOrElse(defaultForwardingPort).toInt, host, 22)
+    println("Connected to "+ host)
+  }
 
   def usage() {
     println("""
@@ -27,101 +79,20 @@ Options:
     exit(1)
   }
 
-  def main(args: Array[String]) {
-    args.length match {
-      case 1 => Nil
-      case 3 => setUpForwarding(args)
-      case _ => usage
-    }
-
-    val (username, host, port, path) = args.length match {
-      case 1 => readHostSpec(args(0))
-      case 3 => readHostSpec(args(2))
-      case _ => dieWithError("Unrecognized number of arguments: "+ args.length)
-    }
-
-//         config.forwardThroughServer match {
-//           case Some(forwardedThroughServer) => {
-//             println("Tailing log files on " + config.server + ", forwarded through " + forwardedThroughServer)
-//             val jsch = new JSch()
-//             val forwardingSession = createSession(jsch, forwardedThroughServer, config.user, config.password, 22)
-//             forwardingSession.connect(defaultTimeout)
-//             forwardingSession.setPortForwardingL(forwardingPort, config.server, 22)
-
-//             val session = createSession(jsch, "localhost", config.user, config.password, forwardingPort)
-//             session.connect(defaultTimeout)
-
-//             val channel = session.openChannel("exec").asInstanceOf[ChannelExec]
-//             channel.setCommand("tail -f " + config.files.mkString("", " ", ""))
-//             channel.setInputStream(null)
-//             channel.setErrStream(System.err)
-//             channel.setOutputStream(System.out)
-//             channel.connect(defaultTimeout)
-//           }
-
-    val password = readPassword().toString
-
-    println("Tailing log files on " + host)
-    val jsch = new JSch()
-    val session = createSession(jsch, host, username, password, 22)
-    session.connect(defaultTimeout)
-    
-    val channel = session.openChannel("exec").asInstanceOf[ChannelExec]
-    channel.setCommand("tail -f "+ path)
-    channel.setInputStream(null)
-    channel.setErrStream(System.err)
-    channel.setOutputStream(System.out)
-    channel.connect(defaultTimeout)
-  }
-
-  def readPassword() = {
-    print("Password: ")
+  def readPassword(username: String, host: String) = {
+    print("Password for "+ username +"@"+ host +": ")
     new jline.ConsoleReader().readLine('*')
   }
   
-  def dieWithError(error: String): (String, String, Option[String], String) = {
+  def dieWithError(error: String): String = {
     println(error)
     exit(1)
   }
 
-  object Username {
-    def unapply(f: String) = {
-      f.substring(0, f.indexOf('@'))
-    }
-  }
-
-  object Host {
-    def unapply(f: String) = {
-      //break(List(NamedParam("f", f)))
-      f.substring(f.indexOf('@') + 1, f.indexOf(':'))
-    }
-  }
-
-  object Port {
-    def unapply(f: String): Option[String] = {
-      var idx = f.indexOf(':')
-      var nextIdx = f.indexOf(':', idx+1)
-      if (nextIdx == -1 || idx == nextIdx)
-	None
-      else
-	Some(f.substring(idx+1, nextIdx))
-    }
-  }
-
-  object Path {
-    def unapply(f: String) = {
-      f.substring(f.lastIndexOf(':') + 1)
-    }
-  }
-
-  def readHostSpec(hostSpec: String): (String, String, Option[String], String) = {
-    // username@host(:port):/path/to/file
-    val username = Username.unapply(hostSpec)
-    val host = Host.unapply(hostSpec)
-    val port = Port.unapply(hostSpec)
-    val path = Path.unapply(hostSpec)
-
-    (username, host, port, path)
+  val RHostSpec = """(.*)@([^:]+)(:\d+)?(:.+)?""".r
+  def readHostSpec(hostSpec: String): (String, String, Option[String], Option[String]) = {
+    val RHostSpec(username, host, port, path) = hostSpec
+    (username, host, if (port == null) None else Some(port tail), if (path == null) None else Some(path tail))
   }
 
 
