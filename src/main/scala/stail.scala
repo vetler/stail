@@ -38,7 +38,10 @@ object STail {
       case Some(x) =>
 	forwardingSetup(jsch, origHost, x)
       case None =>
-	(origHost, origPort)
+	(origHost, origPort match {
+	  case Some(x) => Some(x)
+	  case None => Some("22")
+	})
     }
 
     // Create the session for tailing, connecting either directly to
@@ -47,7 +50,7 @@ object STail {
     val session = createSession(jsch, host, username, password, port.get.toInt)
     session.connect(defaultTimeout)
 
-    println("Connected to "+ origHost + (if (origHost == host) "" else " (via local port "+ port.get))
+    println("Connected to "+ origHost + (if (origHost == host) "" else " (via local port "+ port.get +")"))
 
     val channel = session.openChannel("exec").asInstanceOf[ChannelExec]
     channel.setCommand("tail -f "+ path.get)
