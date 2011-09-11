@@ -48,3 +48,8 @@ build a self-contained jar file.
 
     stail -via anotheruser@external.example.com:9999 user@internal.example.com:/var/log/apache2/access.log
 
+#### Examples without the stail script
+
+    java -jar stail-assembly-0.1.jar user@example.com:/var/log/apache2/access.log
+    
+    java -jar stail-assembly-0.1.jar -via anotheruser@external.example.com:9999 user@internal.example.com:/var/log/apache2/access.log
