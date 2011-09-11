@@ -52,11 +52,19 @@ build a self-contained jar file.
 
     stail -via anotheruser@external.example.com:9999 user@internal.example.com:/var/log/apache2/access.log
 
-#### Examples without the stail script
+### Examples without the stail script
 
     java -jar stail-assembly-0.1.jar user@example.com:/var/log/apache2/access.log
     
     java -jar stail-assembly-0.1.jar -via anotheruser@external.example.com:9999 user@internal.example.com:/var/log/apache2/access.log
+
+
+More advanced usage
+-------------------
+
+If you are impatient and can't wait for new features, feel free to
+fork and implement more advanced features by extending
+`outputstream.scala`.
 
 
 Troubleshooting
