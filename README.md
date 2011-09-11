@@ -53,3 +53,35 @@ build a self-contained jar file.
     java -jar stail-assembly-0.1.jar user@example.com:/var/log/apache2/access.log
     
     java -jar stail-assembly-0.1.jar -via anotheruser@external.example.com:9999 user@internal.example.com:/var/log/apache2/access.log
+
+
+Troubleshooting
+---------------
+
+**Q:** HALP! I get this error message:
+
+    Can't load IA 32-bit .dll on a AMD 64-bit platform
+        at java.lang.ClassLoader$NativeLibrary.load(Native Method)
+        at java.lang.ClassLoader.loadLibrary0(Unknown Source)
+        at java.lang.ClassLoader.loadLibrary(Unknown Source)
+        at java.lang.Runtime.load0(Unknown Source)
+        at java.lang.System.load(Unknown Source)
+        at jline.WindowsTerminal.loadLibrary(WindowsTerminal.java:215)
+        at jline.WindowsTerminal.initializeTerminal(WindowsTerminal.java:144)
+        at jline.Terminal.setupTerminal(Terminal.java:69)
+        at jline.Terminal.getTerminal(Terminal.java:26)
+        at jline.ConsoleReader.<init>(ConsoleReader.java:151)
+        at jline.ConsoleReader.<init>(ConsoleReader.java:146)
+        at jline.ConsoleReader.<init>(ConsoleReader.java:135)
+        at STail$.readPassword(stail.scala:92)
+        at STail$.main(stail.scala:49)
+        at STail.main(stail.scala)
+
+**A:** Try running **stail** with `-Djline.terminal=jline.UnsupportedTerminal`, i.e.:
+
+    java -Djline.terminal=jline.UnsupportedTerminal -jar stail-assembly-0.1.jar user@example.com:/var/log/apache2/access.log
+
+You might not see the password prompt, but you should still be able to
+use the basic functionality while we try to find a more permanent
+solution.
+
