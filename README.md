@@ -35,6 +35,10 @@ it](https://bitbucket.org/vetler/stail/raw/c77f3a5b7cec/src/main/shell/stail),
 download the [pre-built jar file](https://bitbucket.org/vetler/stail/downloads/stail-assembly-0.1.jar) (or build it yourself) and set the
 environment variable `$STAIL_JAR` to point to it.
 
+On Windows you can set the environment variable `%STAIL_JAR`, and use
+the [batch
+file](https://bitbucket.org/vetler/stail/raw/214b50f2a08c/src/main/shell/stail.bat).
+
 If you are building **stail** yourself, you can use `sbt assembly` to
 build a self-contained jar file.
 
