@@ -1,3 +1,4 @@
+[![Build Status](https://drone.io/bitbucket.org/vetler/stail/status.png)](https://drone.io/bitbucket.org/vetler/stail/latest)
 STAIL
 =====
 
@@ -95,4 +96,3 @@ Troubleshooting
 You might not see the password prompt, but you should still be able to
 use the basic functionality while we try to find a more permanent
 solution.
-
