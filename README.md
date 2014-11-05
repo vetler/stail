@@ -1,4 +1,5 @@
 [![Build Status](https://drone.io/bitbucket.org/vetler/stail/status.png)](https://drone.io/bitbucket.org/vetler/stail/latest)
+
 STAIL
 =====
 
